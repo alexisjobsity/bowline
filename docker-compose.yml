@@ -1,7 +1,6 @@
 # Storage
 filestore:
-  image: alpine
-  command: ls -la /var/www
+  build: .docker/unison
   volumes:
     - /var/www
 db:
@@ -48,13 +47,14 @@ web:
 
 # File synchronizing
 sync:
-  image: cweagans/bg-sync
+  build: .docker/unison
+  command: bg-sync
   volumes:
     - .:/source
-  volumes_from:
-    - filestore
+  links:
+    - filestore:filestore
   environment:
-    - SYNC_DESTINATION=/var/www
+    - SYNC_DESTINATION=ssh://filestore//var/www
     - SYNC_MAX_INOTIFY_WATCHES=70000
     - SYNC_VERBOSE=1
   privileged: true
